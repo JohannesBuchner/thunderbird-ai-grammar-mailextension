@@ -12,3 +12,8 @@ If you prefer to keep your data locally, run a [local instance of the Langtool s
 ## Installation
 
 First download the latest .xpi of the add-on [here](https://github.com/raulpardo/thunderbird-langtool-mailextension/releases/), then [install it in Thunderbird as usual](https://support.mozilla.org/en-US/kb/installing-addon-thunderbird).
+
+
+## Contributions
+
+Contributions are more than welcome and encouraged. As mentioned above, the only constraint is only using the [Thunderbird MailExtension API](https://webextension-api.thunderbird.net/en/latest/index.html) (excluding the Experiments API).
