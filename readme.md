@@ -1,6 +1,6 @@
 # Thunderbird Langtool Mail Extension
 
-This an (unofficial) [Language Tool](https://languagetool.org/) extension for [Thunderbird](https://www.thunderbird.net/).
+This is an (unofficial) [Language Tool](https://languagetool.org/) extension for [Thunderbird](https://www.thunderbird.net/).
 This extension makes it possible to query a Language tool server directly from Thunderbird.
 
 The extension may be used with the public Langtool server [https://api.languagetoolplus.com/](https://api.languagetoolplus.com/).
