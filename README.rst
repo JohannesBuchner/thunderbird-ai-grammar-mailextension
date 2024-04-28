@@ -72,10 +72,12 @@ To get the Ollama large language model server:
 6. Compose an email and press the Grammar button. Should look like the demo above!
 
 
-Help developing
+Making changes
 ---------------
 
 Contributions are more than welcome and encouraged in the form of pull requests.
+
+It is not too hard to create your own modified extension to suit your workflow!
 
 Useful resources:
 
@@ -91,6 +93,11 @@ Manual installation (allows modifying the extension):
       git clone https://github.com/JohannesBuchner/thunderbird-ai-grammar-mailextension`
 
 2. follow instructions on https://developer.thunderbird.net/add-ons/hello-world-add-on to select and load manifest.json as a temporary extension.
+
+.. image:: https://github.com/JohannesBuchner/thunderbird-ai-grammar-mailextension/raw/main/doc/debug-install.gif
+   :alt: Example of usage of this extension
+   :target: https://github.com/JohannesBuchner/thunderbird-ai-grammar-mailextension/raw/main/doc/debug-install.webm
+
 3. Go to the thunderbird add-ons panel, find "AI Grammar" and go to the "Preferences" tab
 4. Set server url above to http://localhost:11434/ and press test.
 
@@ -99,6 +106,8 @@ Manual installation (allows modifying the extension):
    * If you get "200 OK; It worked OK!", then everything is okay and llama3 responded!
 
 5. Compose an email and press the Grammar button. Should look like the demo above!
+
+
 
 Making a release
 ----------------
