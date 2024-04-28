@@ -1,18 +1,41 @@
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="utf-8"/>
+    <link rel="stylesheet" href="optstyle.css" type="text/css"></style>
   </head>
 
   <body>
-    <p> The server is set up to <b id="managed-server">no value found</b></p>
+    <p>The server is set up to <b id="managed-server">no value found</b>.</p>
     <form>
-      <label>Server URL</label>
-      <input type="text" id="server"/>
+      <label>Server URL: 
+      <input type="text" id="server" value="http://127.0.0.1:11434/"/></label>
+      <br/>
+      <label>Prompt for Llama3 before the email draft text: <br/>
+      <input type="text" id="prompt" value="Fix grammar mistakes in the following text. If no issues are found, reply with '> OK'. Otherwise only reply with the full new text without adding anything before or after to the reply such as 'Here is the corrected text:'." /></label>
+      Your email drafts remain local and do not leave your computer.
+      <br />
       <button type="button" id="save">Save</button>
+      <button type="button" id="test">Test</button><b id="resultStatus"></b><em id="resultText"></em>
     </form>
-    <p> You can use the public Langtool server <a>https://api.languagetoolplus.com/</a>.
-      <br>
-      If you prefer to keep your data locally, run a <a href="https://dev.languagetool.org/http-server">local instance of the Langtool server</a> and change the Server URL to your localhost instance.</p>
+    <h3>Installation instructions</h3>
+       <ol>
+          <li>Install Docker
+          <li>Run <a href="https://hub.docker.com/r/ollama/ollama">Ollama</a> docker image with:
+             <textarea class="code" readonly="readonly" rows=1>docker run -d -v ollama:/root/.ollama -p 11434:11434 -e 'OLLAMA_ORIGINS=moz-extension://*' --name ollama ollama/ollama</textarea>
+             Note the OLLAMA_ORIGINS in addition to the official install commands.
+             If you later want to stop and shutdown the server:
+             <textarea class="code" readonly="readonly" rows=3>docker stop ollama
+docker rm ollama
+</textarea>
+          <li>Pull llama3 LLM: 
+             <textarea class="code" readonly="readonly" rows=1>docker exec -i ollama ollama pull llama3</textarea>
+          <li>Set server url above to http://localhost:11434/ and press test.
+          <li>Compose an email and press the Grammar button.
+       </ol>
+    <p>If you have issues with ollama, look for help at <a href="https://ollama.com/">ollama.com</a>.
+       Do not open an issue with this extension.
+    </p>
     <script src="options.js"></script>
   </body>
 </html>

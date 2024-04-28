@@ -31,3 +31,21 @@
 #currentOutput {
     font-size: 14px;
 }
+.prevtext {
+    color: gray;
+}
+.suggestedtext {
+    color: darkgreen;
+    cursor: pointer;
+}
+textarea.code {
+    color: #333;
+    font-family: monospace;
+    display: block;
+}
+input#prompt {
+    width: 90em;
+    color: red;
+}
+
+

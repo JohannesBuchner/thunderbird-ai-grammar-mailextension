@@ -1,0 +1,17 @@
+textarea.code {
+    color: #333;
+    font-family: monospace;
+    display: block;
+    width: 100%;
+}
+input#prompt {
+    width: 100%;
+}
+input, label {
+    padding-bottom: 5px;
+    padding-top: 5px;
+}
+#resultStatus, #resultText {
+    padding: 1em;
+}
+

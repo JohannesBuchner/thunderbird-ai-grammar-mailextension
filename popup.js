@@ -5,116 +5,174 @@ browser.tabs.query({
 }).then(tabs => {
     let tabId = tabs[0].id;
     browser.compose.getComposeDetails(tabId).then((details) => {
-	// For now we only handle plain text emails
-	if (details.isPlainText) {
-
-	    // Add event listener for the reload button
-	    document.getElementById("rld").addEventListener("click", function () {
-		
-		// Empty the current output if there is one
-		emptyCurrentOutput();
-		
-		// Send request to the langtool server
-		initSendRequest(details);
-	    });
-	    
-	    // Retreive possible existing output
-	    var previousOutput = browser.storage.local.get("tempOutput");
-	    previousOutput.then((res) => {
-
-		// If there was no existing output in the local storage send a request
-		if (res.tempOutput == "empty") {
-		    initSendRequest(details);
-		    
-		// Otherwise, print the previous output from local storage
-		} else {
-		    setOutput(res.tempOutput);
-		    addOldOutputWarning();
-		}	
-	    });
-	}
-    });
+        // For now we only handle plain text emails
+        if (details.isPlainText) {
+            // Add event listener for the reload button
+            document.getElementById("rld").addEventListener("click", function () {
+               initSendRequest(tabId, details);
+            });
+        
+            initSendRequest(tabId, details);
+        };
+    })
 });
 
 
 // Initialize and send the request
-function initSendRequest(details) {
-		    
-    // Retreive server from local storage
-    var storageServer = browser.storage.local.get("server");
-    storageServer.then((res) => {
-	const url_text= res.server+"v2/check";
-	
-	// Send Request to Langtool Server
-	sendRequest(details,url_text);
+function initSendRequest(tabId, details) {
+    // Retrieve server from local storage
+    var storageItem = browser.storage.local.get("server");
+    storageItem.then((res) => {
+        server_name = res.server;
+        const url_text = res.server.replace(/\/*$/, "") + "/api/generate";
+        // Send Request to ollama Server
+        sendRequest(tabId, details, url_text);
     });
 }
 
 
 // Send the request to Langtool server
-function sendRequest(details,url_text) {
+function sendRequest(tabId, details, url_text) {
     // Add the loading icon
     document.getElementById("output").classList.add("loader");
 
+    //details.plainTextBody = "She sells sea shells near a nearest shore. Frank fells downs the trees.\n\n" + 
+    //      "Once I went always to the trains station to bick up a friend.\n" + 
+    //      "Then we walked back home.\n";
+    //browser.compose.setComposeDetails(tabId, details);
     // Prepare & send request
-    const xhttp = new XMLHttpRequest();
-    xhttp.open("GET", url_text+
-	       "?data="+
-	       encodeURIComponent(JSON.stringify({"text": details.plainTextBody,
-						  "marker": ">"}))+
-	       "&language=auto"
-	      );
-    xhttp.send();
+    console.log('Content of message:' + details.plainTextBody);
+    var text = details.plainTextBody.split('\n').filter(line => !line.startsWith('>')).join('\n');
 
+    var xhttp = new XMLHttpRequest();
+    xhttp.open('POST', url_text, true);
+    xhttp.setRequestHeader('Content-Type', 'application/json');
+    var data = JSON.stringify({
+      "model": "llama3",
+      "prompt": "Fix grammar mistakes in the following text. If no issues are found, reply with '> OK'." +
+          "Otherwise only reply with the full new text without adding anything before or after to the reply such as 'Here is the corrected text:'.\n\n" + 
+          text,
+      "stream": false
+    });
+    console.log('Requesting:' + data);
     // Handling received message
     xhttp.onreadystatechange = (e) => {
-	// Remove loading icon
-	document.getElementById("output").classList.remove("loader");
-	
-	// Empty the output
-	emptyCurrentOutput();
-	
-	// If the server responded successfully, add response to the popup
-	if (xhttp.readyState == 4 && xhttp.status == 200) {	    
-	    resp = JSON.parse(xhttp.responseText);
-	    setOutput(resp);
-	    // remove the previous output warning
-	    removeOldOutputWarning();
-
-	// If the server cannot be successfully reached, add error message to the popup
-	} else {	    
-	    setErrorMessage();
-	}
+        console.log('onreadystatechange:' + xhttp.statusText + " State:" + xhttp.readyState);
+        // Remove loading icon
+        document.getElementById("output").classList.remove("loader");
+        
+        // Empty the output
+        emptyCurrentOutput();
+    	
+        // If the server responded successfully, add response to the popup
+        if (xhttp.readyState == 4 && xhttp.status == 200) {        
+            console.log('Response:' + xhttp.responseText);
+            resp = JSON.parse(xhttp.responseText);
+            setOutput(tabId, details, resp, text);
+            // remove the previous output warning
+            removeOldOutputWarning();
+        // If the server cannot be successfully reached, add error message to the popup
+        } else {
+            setErrorMessage();
+        }
     }
+    xhttp.send(data);
 }
 
 
+function uncommon_left(str1, str2) {
+    let prefix = '';
+    for (let i = 0; i < Math.min(str1.length, str2.length); i++) {
+        if (str1[i] === str2[i]) {
+            prefix += str1[i];
+        } else {
+            break;
+        }
+    }
+    return prefix.length;
+}
+function uncommon_right(str1, str2) {
+    // Find the longest common suffix
+    let suffix = '';
+    for (let i = 0; i < Math.min(str1.length, str2.length); i++) {
+        if (str1[str1.length - 1 - i] === str2[str2.length - 1 - i]) {
+            suffix = str1[str1.length - 1 - i] + suffix;
+        } else {
+            break;
+        }
+    }
+    return suffix.length;
+}
+
 // Set the output HTML with the text received from the server (or
 // stored in the local storage)
-function setOutput(resp) {
+function setOutput(tabId, details, resp, text) {
     if (resp === undefined) {
-	setErrorMessage();	
+       setErrorMessage();    
     }
-    else if (resp["matches"].length == 0) {
-	setNoErrorsFoundMessage();
+    else if (resp["response"].length == 0 || resp["response"] == "> OK") {
+       setNoErrorsFoundMessage();
     }
     else {
-	var ul = document.body.appendChild(document.createElement("ol"));
-	resp["matches"].forEach(function (e) {
-	    var li = document.createElement("li");
-	    var str = createItem(e);
-	    li.innerHTML = str;
-	    ul.appendChild(li);
-	});
-	ul.setAttribute("id", "currentOutput");
-	saveCurrentOutput(resp);
+        var ul = document.body.appendChild(document.createElement("ol"));
+        // take each line of the output
+        var origchunks = details.plainTextBody.split('\n');
+        var newchunks = resp["response"].split("\n");
+        var i = 0;
+        var j = 0;
+        while (i < origchunks.length && j < newchunks.length) {
+           if (origchunks[i].startsWith('>')) {
+              i++;
+              continue;
+           }
+           if (origchunks[i].trim() == "") {
+              i++;
+              continue;
+           }
+           if (newchunks[j].trim() == "") {
+              j++;
+              continue;
+           }
+           if (origchunks[i] != newchunks[j]) {
+              // find smallest change
+		      var li = document.createElement("li");
+		      var oldtext = document.createElement("div");
+		      var prefix_length = uncommon_left(origchunks[i], newchunks[j]);
+		      var suffix_length = uncommon_right(origchunks[i], newchunks[j]);
+		      oldtext.classList.add("oldtext");
+		      oldtext.innerHTML = origchunks[i].substring(prefix_length, origchunks[i].length - suffix_length);
+		      var suggestedtext = document.createElement("div");
+		      suggestedtext.classList.add("suggestedtext");
+		      suggestedtext.innerHTML = newchunks[j].substring(prefix_length, newchunks[j].length - suffix_length);
+		      li.appendChild(oldtext);
+		      li.appendChild(suggestedtext);
+              let currentIndexI = i;
+              let currentIndexJ = j;
+		      li.onclick = function() {
+                 browser.compose.getComposeDetails(tabId).then((details) => {
+                    // copy in this chunk into the compose text body
+                    var finalchunks = details.plainTextBody.split('\n');
+                    finalchunks[currentIndexI] = newchunks[currentIndexJ];
+                    details.plainTextBody = finalchunks.join("\n");
+                    browser.compose.setComposeDetails(tabId, details);
+                 });
+		      };
+		      ul.appendChild(li);
+           }
+           i++;
+           j++;
+        }
+        ul.setAttribute("id", "currentOutput");
+        saveCurrentOutput(resp["response"]);
+        details.plainTextBody = resp["response"];
+        browser.compose.setComposeDetails(tabId, details);
     }
 }
 
 function setErrorMessage() {
     p = document.body.appendChild(document.createElement("p"));
     p.innerHTML = "Server not found. <br><br>" +
-	"Please start the server, or update the URL in the settings page of the extension."
+    "Please start the server, or update the URL in the settings page of the extension."
     p.setAttribute("id", "currentOutput")
     saveCurrentOutput("empty");
 }
@@ -130,14 +188,14 @@ function setNoErrorsFoundMessage() {
 // different entries of the langtool response
 function createItem(e) {
     return "" +
-	"<u>Sentence</u>: "     + createSentence(e)              +
-	"<br>"                                                   +
-	"<u>Description</u>: "  + e['rule'].description          +
-	"<br>"                                                   +
-	"<u>Type</u>: "         + e['rule'].issueType.italics()  +
-	"<br>"                                                   +
-	"<u>Replacements</u>: " + createReplacements(e)          +
-	"<br><br>";
+    "<u>Sentence</u>: "     + createSentence(e)              +
+    "<br>"                                                   +
+    "<u>Description</u>: "  + e['rule'].description          +
+    "<br>"                                                   +
+    "<u>Type</u>: "         + e['rule'].issueType.italics()  +
+    "<br>"                                                   +
+    "<u>Replacements</u>: " + createReplacements(e)          +
+    "<br><br>";
 }
 
 function createSentence(e) {
@@ -155,8 +213,8 @@ function createReplacements(e) {
 function emptyCurrentOutput() {
     // Check whether there is a current output
     if (document.contains(document.getElementById("currentOutput"))) {
-	// Remove the current output
-	document.getElementById("currentOutput").remove();
+        // Remove the current output
+        document.getElementById("currentOutput").remove();
     }
 }
 
@@ -168,7 +226,8 @@ function addOldOutputWarning() {
 }
 
 function removeOldOutputWarning() {
-    document.getElementById("warning-old-output").remove();
+    var oldel = document.getElementById("warning-old-output");
+    if (oldel) oldel.remove();
 }
 
 // Save the current output in local storage

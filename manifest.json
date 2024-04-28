@@ -1,34 +1,35 @@
 {
-    "name": "Thunderbird Langtool Mail Extension",
-    "description": "Language Tool extension for Thunderbird (unofficial)",
+    "name": "AI Grammar",
+    "description": "Helps you write emails with the Llama3 LLM (offline).",
     "version": "1",
-    "author": "Raul Pardo",
+    "author": "Johannes Buchner",
     "applications": {
-	"gecko": {
-	    "id": "langtool-thunderbird@raulpardo.net",
-	    "strict_min_version": "74.0b2"
-	}
+        "gecko": {
+            "id": "llama3-grammar-thunderbird@johannes.buchner.net",
+            "strict_min_version": "74.0b2"
+        }
     },
     "icons": {
         "64": "img/icon.png"
     },
     "permissions": [
-	"storage",
-	"compose"
+        "storage",
+        "compose",
+        "<all_urls>"
     ],
     "background": {
-	"scripts": [
-	    "background.js"
-	]
+        "scripts": [
+            "background.js"
+        ]
     },
     "compose_action": {
-	"default_title": "Grammar Check",
-	"default_popup": "popup.html",
-	"default_icon": "img/icon.png"
+        "default_title": "Grammar",
+        "default_popup": "popup.html",
+        "default_icon": "img/icon.png"
     },
-    "options_ui": {	
-	"page": "options.html",
-	"open_in_tab": false,
+    "options_ui": {        
+        "page": "options.html",
+        "open_in_tab": false,
         "browser_style": true
     },
     "manifest_version": 2
