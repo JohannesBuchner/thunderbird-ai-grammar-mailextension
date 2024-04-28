@@ -17,18 +17,24 @@ and in the options.html file here.
 
 **Malleable**: Editable prompt for the LLM: You can make this add-on do different tasks.
 
-.. image:: https://github.com/JohannesBuchner/thunderbird-ai-grammar-mailextension/raw/main/doc/run.webm
+.. image:: https://github.com/JohannesBuchner/thunderbird-ai-grammar-mailextension/raw/main/doc/run.gif
    :alt: Example of usage of this extension
 
 Installation
 ------------
 
-Easiest is to download from the official add-ons page.
-Otherwise, download the latest .xpi of the add-on [from the GitHub releases](https://github.com/raulpardo/thunderbird-langtool-mailextension/releases/), then [install it in Thunderbird as usual](https://support.mozilla.org/en-US/kb/installing-addon-thunderbird).
+1. Easiest is to download from the official add-ons page.
 
-Go into the add-ons manager, find "AI Grammar" and click on "Preferences".
+2. Go into the add-ons manager, find "AI Grammar" and click on "Preferences".
 
-To get the Ollama with  server
+Installing the Ollama large language model server
+--------------------------------------------------
+
+These installation instructions are provided on a best-effort basis. If
+they do not work or are outdated, please do not complain here but look up the official instructions
+and ask for help there. Suggestions for improved instructions are welcome!
+
+To get the Ollama large language model server:
 
 1. Install Docker (search online for "docker install " + Windows, MacOS or Linux to find install instructions).
 2. Run the Ollama docker image, instructions are on the `Ollama github <https://hub.docker.com/r/ollama/ollama>`_. For me on Linux, I ran:: 
