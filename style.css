@@ -36,7 +36,6 @@
 }
 .suggestedtext {
     color: darkgreen;
-    cursor: pointer;
 }
 textarea.code {
     color: #333;

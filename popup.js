@@ -23,26 +23,37 @@ function initSendRequest(tabId, details) {
     // Retrieve server from local storage
     var storageItem = browser.storage.local.get("server");
     storageItem.then((res) => {
-        server_name = res.server;
-        const url_text = res.server.replace(/\/*$/, "") + "/api/generate";
-        // Send Request to ollama Server
-        sendRequest(tabId, details, url_text);
+        if (typeof res.server === "undefined") {
+           emptyCurrentOutput();
+           p = document.body.appendChild(document.createElement("p"));
+           p.textContent = "Visit the preferences page of the extension first!"
+           p.setAttribute("id", "currentOutput")
+           saveCurrentOutput("empty");
+        } else {
+           server_name = res.server;
+           const url_text = res.server.replace(/\/*$/, "") + "/api/generate";
+
+           var text = details.plainTextBody.split(/\n-- *\n|\n---*[^-]*.*\n/)[0].split("\n").filter(line => !line.startsWith('>')).join("\n").trim();
+           if (text == "") {
+               emptyCurrentOutput();
+               p = document.body.appendChild(document.createElement("p"));
+               p.textContent = "First write text into your draft email!"
+               p.setAttribute("id", "currentOutput")
+               saveCurrentOutput("empty");
+               document.getElementById("output").classList.remove("loader");
+           } else {
+               // Send Request to ollama Server
+               sendRequest(tabId, details, url_text, text);
+           }
+        }
     });
 }
 
 
 // Send the request to Langtool server
-function sendRequest(tabId, details, url_text) {
+function sendRequest(tabId, details, url_text, text) {
     // Add the loading icon
     document.getElementById("output").classList.add("loader");
-
-    //details.plainTextBody = "She sells sea shells near a nearest shore. Frank fells downs the trees.\n\n" + 
-    //      "Once I went always to the trains station to bick up a friend.\n" + 
-    //      "Then we walked back home.\n";
-    //browser.compose.setComposeDetails(tabId, details);
-    // Prepare & send request
-    console.log('Content of message:' + details.plainTextBody);
-    var text = details.plainTextBody.split('\n').filter(line => !line.startsWith('>')).join('\n');
 
     var xhttp = new XMLHttpRequest();
     xhttp.open('POST', url_text, true);
@@ -54,10 +65,10 @@ function sendRequest(tabId, details, url_text) {
           text,
       "stream": false
     });
-    console.log('Requesting:' + data);
+    // console.log('Requesting:' + data);
     // Handling received message
     xhttp.onreadystatechange = (e) => {
-        console.log('onreadystatechange:' + xhttp.statusText + " State:" + xhttp.readyState);
+        // console.log('onreadystatechange:' + xhttp.statusText + " State:" + xhttp.readyState);
         // Remove loading icon
         document.getElementById("output").classList.remove("loader");
         
@@ -66,7 +77,7 @@ function sendRequest(tabId, details, url_text) {
     	
         // If the server responded successfully, add response to the popup
         if (xhttp.readyState == 4 && xhttp.status == 200) {        
-            console.log('Response:' + xhttp.responseText);
+            // console.log('Response:' + xhttp.responseText);
             resp = JSON.parse(xhttp.responseText);
             setOutput(tabId, details, resp, text);
             // remove the previous output warning
@@ -89,7 +100,7 @@ function uncommon_left(str1, str2) {
             break;
         }
     }
-    return prefix.length;
+    return prefix.split(" ").slice(0, -1).join(" ").length;
 }
 function uncommon_right(str1, str2) {
     // Find the longest common suffix
@@ -101,7 +112,7 @@ function uncommon_right(str1, str2) {
             break;
         }
     }
-    return suffix.length;
+    return suffix.split(" ").slice(1).join(" ").length;
 }
 
 // Set the output HTML with the text received from the server (or
@@ -116,11 +127,12 @@ function setOutput(tabId, details, resp, text) {
     else {
         var ul = document.body.appendChild(document.createElement("ol"));
         // take each line of the output
-        var origchunks = details.plainTextBody.split('\n');
+        var origchunks = details.plainTextBody.split("\n");
         var newchunks = resp["response"].split("\n");
         var i = 0;
         var j = 0;
         while (i < origchunks.length && j < newchunks.length) {
+           // console.log(i + "/" + j + ": comparing: [" + origchunks[i] + "] with [" + newchunks[j] + "]");
            if (origchunks[i].startsWith('>')) {
               i++;
               continue;
@@ -140,73 +152,38 @@ function setOutput(tabId, details, resp, text) {
 		      var prefix_length = uncommon_left(origchunks[i], newchunks[j]);
 		      var suffix_length = uncommon_right(origchunks[i], newchunks[j]);
 		      oldtext.classList.add("oldtext");
-		      oldtext.innerHTML = origchunks[i].substring(prefix_length, origchunks[i].length - suffix_length);
+		      oldtext.textContent = origchunks[i].substring(prefix_length, origchunks[i].length - suffix_length);
 		      var suggestedtext = document.createElement("div");
 		      suggestedtext.classList.add("suggestedtext");
-		      suggestedtext.innerHTML = newchunks[j].substring(prefix_length, newchunks[j].length - suffix_length);
+		      suggestedtext.textContent = newchunks[j].substring(prefix_length, newchunks[j].length - suffix_length);
 		      li.appendChild(oldtext);
 		      li.appendChild(suggestedtext);
-              let currentIndexI = i;
-              let currentIndexJ = j;
-		      li.onclick = function() {
-                 browser.compose.getComposeDetails(tabId).then((details) => {
-                    // copy in this chunk into the compose text body
-                    var finalchunks = details.plainTextBody.split('\n');
-                    finalchunks[currentIndexI] = newchunks[currentIndexJ];
-                    details.plainTextBody = finalchunks.join("\n");
-                    browser.compose.setComposeDetails(tabId, details);
-                 });
-		      };
 		      ul.appendChild(li);
+		      origchunks[i] = newchunks[j];
            }
            i++;
            j++;
         }
         ul.setAttribute("id", "currentOutput");
         saveCurrentOutput(resp["response"]);
-        details.plainTextBody = resp["response"];
+        details.plainTextBody = origchunks.join("\n");
         browser.compose.setComposeDetails(tabId, details);
     }
 }
 
 function setErrorMessage() {
     p = document.body.appendChild(document.createElement("p"));
-    p.innerHTML = "Server not found. <br><br>" +
-    "Please start the server, or update the URL in the settings page of the extension."
+    p.textContent = "Server not found. " +
+    "Start the server or update the URL in the preferences page of the extension."
     p.setAttribute("id", "currentOutput")
     saveCurrentOutput("empty");
 }
 
 function setNoErrorsFoundMessage() {
     p = document.body.appendChild(document.createElement("p"));
-    p.innerHTML = "No errors found. Congrats!"
+    p.textContent = "No errors found. Congrats!"
     p.setAttribute("id", "currentOutput");
     saveCurrentOutput("empty");
-}
-
-// In the following there are several functions to create the
-// different entries of the langtool response
-function createItem(e) {
-    return "" +
-    "<u>Sentence</u>: "     + createSentence(e)              +
-    "<br>"                                                   +
-    "<u>Description</u>: "  + e['rule'].description          +
-    "<br>"                                                   +
-    "<u>Type</u>: "         + e['rule'].issueType.italics()  +
-    "<br>"                                                   +
-    "<u>Replacements</u>: " + createReplacements(e)          +
-    "<br><br>";
-}
-
-function createSentence(e) {
-    return "" +
-        e["context"].text.substring(0,e["context"].offset) +
-        "<b>" + e["context"].text.substring(e["context"].offset,e["context"].offset+e["context"].length) + "</b> " +
-        e["context"].text.substring(e["context"].offset+e["context"].length,e["context"].text.length);
-}
-
-function createReplacements(e) {
-    return e['replacements'].slice(0, 7).map((x) => x.value).join(", ") + " ...";
 }
 
 // Empty the current output in the popup window
@@ -220,7 +197,7 @@ function emptyCurrentOutput() {
 
 function addOldOutputWarning() {
     var p = document.createElement("p");
-    p.innerHTML="(previous output, click refresh to update)"
+    p.textContent="(previous output, click refresh to update)"
     p.setAttribute("id", "warning-old-output");
     document.getElementById("header-row").appendChild(p);
 }

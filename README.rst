@@ -17,16 +17,24 @@ and in the options.html file here.
 
 **Malleable**: Editable prompt for the LLM: You can make this add-on do different tasks.
 
+* Quoted text, signatures and forwarded email portions are skipped. Only text emails are supported.
+
+Demo
+----
+
 .. image:: https://github.com/JohannesBuchner/thunderbird-ai-grammar-mailextension/raw/main/doc/run.gif
    :alt: Example of usage of this extension
-   :target: https://github.com/JohannesBuchner/thunderbird-ai-grammar-mailextension/raw/main/doc/run.webm 
+   :target: https://github.com/JohannesBuchner/thunderbird-ai-grammar-mailextension/raw/main/doc/run.webm
+
 
 Installation
 ------------
 
-1. Easiest is to download from the official add-ons page.
+1. Easiest is to download from the official thunderbird add-ons page: https://addons.thunderbird.net/en-US/thunderbird/addon/ai-grammar/
+   Otherwise go down to "Help contributing" for manual installation.
 
 2. Go into the add-ons manager, find "AI Grammar" and click on "Preferences".
+
 
 Installing the Ollama large language model server
 --------------------------------------------------
@@ -61,11 +69,11 @@ To get the Ollama large language model server:
    * If you get "404" or other could not connect error, the server is not running.
    * If you get "200 OK; It worked OK!", then everything is okay and llama3 responded!
 
-6. Compose an email and press the Grammar button. Example:
+6. Compose an email and press the Grammar button. Should look like the demo above!
 
 
-Contributing and Developing
----------------------------
+Help developing
+---------------
 
 Contributions are more than welcome and encouraged in the form of pull requests.
 
@@ -74,6 +82,23 @@ Useful resources:
 * What are all these files and how do they interact? --> https://developer.thunderbird.net/add-ons/mailextensions
 * How can I install, play with the extension while developing, and debug it with the console? --> https://developer.thunderbird.net/add-ons/hello-world-add-on
 * Thunderbird MailExtension API: https://webextension-api.thunderbird.net/en/latest/
+
+Manual installation (allows modifying the extension):
+
+1. Download this repository folder `as a zip <https://github.com/JohannesBuchner/thunderbird-ai-grammar-mailextension/archive/refs/heads/main.zip>`_ and extract it into a folder.
+   Alternatively, get a full copy of the code repository with::
+
+      git clone https://github.com/JohannesBuchner/thunderbird-ai-grammar-mailextension`
+
+2. follow instructions on https://developer.thunderbird.net/add-ons/hello-world-add-on to select and load manifest.json as a temporary extension.
+3. Go to the thunderbird add-ons panel, find "AI Grammar" and go to the "Preferences" tab
+4. Set server url above to http://localhost:11434/ and press test.
+
+   * If you get "403 Forbidden" then there is a CORS issue. You need to set the OLLAMA_ORIGINS.
+   * If you get "404" or other could not connect error, the server is not running.
+   * If you get "200 OK; It worked OK!", then everything is okay and llama3 responded!
+
+5. Compose an email and press the Grammar button. Should look like the demo above!
 
 Making a release
 ----------------
