@@ -19,6 +19,7 @@ and in the options.html file here.
 
 .. image:: https://github.com/JohannesBuchner/thunderbird-ai-grammar-mailextension/raw/main/doc/run.gif
    :alt: Example of usage of this extension
+   :target: https://github.com/JohannesBuchner/thunderbird-ai-grammar-mailextension/raw/main/doc/run.webm 
 
 Installation
 ------------
