@@ -17,6 +17,9 @@ and in the options.html file here.
 
 **Malleable**: Editable prompt for the LLM: You can make this add-on do different tasks.
 
+.. image:: https://github.com/JohannesBuchner/thunderbird-ai-grammar-mailextension/raw/main/doc/run.webm
+   :alt: Example of usage of this extension
+
 Installation
 ------------
 
@@ -60,6 +63,7 @@ Contributing and Developing
 Contributions are more than welcome and encouraged in the form of pull requests.
 
 Useful resources:
+
 * What are all these files and how do they interact? --> https://developer.thunderbird.net/add-ons/mailextensions
 * How can I install, play with the extension while developing, and debug it with the console? --> https://developer.thunderbird.net/add-ons/hello-world-add-on
 * Thunderbird MailExtension API: https://webextension-api.thunderbird.net/en/latest/
