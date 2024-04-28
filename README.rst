@@ -30,7 +30,7 @@ Demo
 Installation
 ------------
 
-1. Easiest is to download from the official thunderbird add-ons page: https://addons.thunderbird.net/en-US/thunderbird/addon/ai-grammar/
+1. Easiest is to download from the official thunderbird add-ons page: https://addons.thunderbird.net/addon/ai-grammar/
    Otherwise go down to "Help contributing" for manual installation.
 
 2. Go into the add-ons manager, find "AI Grammar" and click on "Preferences".
@@ -105,7 +105,18 @@ Manual installation (allows modifying the extension):
    * If you get "404" or other could not connect error, the server is not running.
    * If you get "200 OK; It worked OK!", then everything is okay and llama3 responded!
 
-5. Compose an email and press the Grammar button. Should look like the demo above!
+5. Compose an email and press the Grammar button. Should look like the demo above! A test text::
+
+	She seeks sea shells near a nearest shore. Frank falls down trees.
+
+	> but here we has a bad quotie which does not make any senses.
+	> This should please kindly friendlyly be ignored. Thanks yous.
+
+	Once I went always to the train station to pick up a friend. Then we walked back home.
+
+	--
+
+	well laddie what says you? are we do good things? This signature will not be checked.
 
 
 
