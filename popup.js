@@ -5,18 +5,14 @@ browser.tabs.query({
 }).then(tabs => {
     let tabId = tabs[0].id;
     browser.compose.getComposeDetails(tabId).then((details) => {
-        // For now we only handle plain text emails
-        if (details.isPlainText) {
-            // Add event listener for the reload button
-            document.getElementById("rld").addEventListener("click", function () {
-               initSendRequest(tabId, details);
-            });
-        
-            initSendRequest(tabId, details);
-        };
+        // Add event listener for the reload button
+        document.getElementById("rld").addEventListener("click", function () {
+           initSendRequest(tabId, details);
+        });
+    
+        initSendRequest(tabId, details);
     })
 });
-
 
 // Initialize and send the request
 function initSendRequest(tabId, details) {
@@ -167,8 +163,38 @@ function setOutput(tabId, details, resp, text) {
         ul.setAttribute("id", "currentOutput");
         saveCurrentOutput(resp["response"]);
         details.plainTextBody = origchunks.join("\n");
+        details.body = "<p>" + origchunks.join("<p>");
         browser.compose.setComposeDetails(tabId, details);
     }
+}
+
+function insertParagraphs(plainText, htmlString) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlString, 'text/html');
+    const body = doc.querySelector('body');
+
+    // Remove all existing <p> elements after <body>
+    let nextNode = body.firstElementChild.nextSibling;
+    while (nextNode) {
+        const currentNode = nextNode;
+        nextNode = nextNode.nextSibling;
+        if (currentNode.tagName.toLowerCase() === 'p') {
+            body.removeChild(currentNode);
+        } else {
+            break;
+        }
+    }
+
+    // Split plaintext into lines and insert <p> elements for each line
+    const lines = plainText.trim().split('\n');
+    lines.forEach(line => {
+        const paragraph = doc.createElement('p');
+        paragraph.textContent = line.trim();
+        body.appendChild(paragraph);
+        body.parentNode.insertBefore(p, body.nextSibling);
+    });
+
+    return doc.documentElement.outerHTML;
 }
 
 function setErrorMessage() {
