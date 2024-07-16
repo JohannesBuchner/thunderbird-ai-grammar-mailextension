@@ -1,7 +1,7 @@
 {
     "name": "AI Grammar",
     "description": "Helps you write emails with the Llama3 LLM (offline).",
-    "version": "1",
+    "version": "2",
     "author": "Johannes Buchner",
     "applications": {
         "gecko": {
